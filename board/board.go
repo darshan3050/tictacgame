@@ -14,17 +14,17 @@ type Board struct {
 var newBoard *Board
 
 func CreateNewBoard(BoardSize int) *Board {
-	if newBoard != nil {
-		return newBoard
-	} else {
-		newBoard = CreateBoard(BoardSize)
-		return newBoard
-	}
+	// if newBoard != nil {
+	// 	return newBoard
+	// } else {
+	newBoard = CreateBoard(BoardSize)
+	return newBoard
+	// }
 }
 func CreateBoard(BoardSize int) *Board {
 	var TempBoard Board
 	for i := 0; i < BoardSize*BoardSize; i++ {
-		TempBoard.Cell = append(TempBoard.Cell, *cell.NewCell())
+		TempBoard.Cell = append(TempBoard.Cell, *cell.NewCell(i))
 
 	}
 	TempBoard.Size = BoardSize
@@ -36,17 +36,20 @@ func (b *Board) Analyse(p *player.Player) bool {
 	status = b.AnalyseVertical(p)
 	if status {
 		fmt.Println(p.Name, " Won the round by Vertical Match")
+		newBoard = nil
 		return status
 	}
 	//check all horizontal
 	status = b.AnalyseHorizontal(p)
 	if status {
 		fmt.Println(p.Name, " Won the round by Horizontal Match")
+		newBoard = nil
 		return status
 	}
 	//check all diagonal
 	status = b.AnalyseDiagonal(p)
 	if status {
+		newBoard = nil
 		fmt.Println(p.Name, " Won the round by Diagonal Match")
 		return status
 	}

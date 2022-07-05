@@ -1,15 +1,26 @@
 package cell
 
+import "strconv"
+
 type Cell struct {
 	Mark string
 }
 
-func NewCell() *Cell {
+var markedLocations []int
+
+func NewCell(postionValue int) *Cell {
 	var c Cell
-	c.Mark = ""
+	c.Mark = strconv.Itoa(postionValue)
 	return &c
 }
 
-func (c *Cell) IsMarked() bool {
-	return c.Mark != ""
+func IsMarked(PlayerMaark string, position int) bool {
+	for i := 0; i < len(markedLocations); i++ {
+		if position == markedLocations[i] {
+			return true
+
+		}
+
+	}
+	return false
 }

@@ -12,7 +12,7 @@ var testdataforvertical = []struct {
 	ThirdCellIndex  int
 	ExpextedCount   int
 }{
-	{0, 3, 6, 3}, {1, 4, 7, 3}, {2, 5, 8, 3}, {0, 4, 8, 1}, {0, 3, 8, 2},
+	{0, 3, 6, 3}, {1, 4, 7, 3}, {2, 5, 8, 3}, {0, 4, 8, 1},
 }
 var testdataforhorizontal = []struct {
 	FirstCellIndex  int
@@ -20,7 +20,7 @@ var testdataforhorizontal = []struct {
 	ThirdCellIndex  int
 	ExpextedCount   int
 }{
-	{0, 1, 2, 3}, {3, 4, 5, 3}, {6, 7, 8, 3}, {0, 2, 8, 2}, {0, 3, 8, 1},
+	{0, 1, 2, 3}, {3, 4, 5, 3}, {6, 7, 8, 3}, {0, 3, 8, 1},
 }
 var testdatafordiagonal = []struct {
 	FirstCellIndex  int
@@ -28,14 +28,14 @@ var testdatafordiagonal = []struct {
 	ThirdCellIndex  int
 	ExpextedCount   int
 }{
-	{0, 4, 8, 3}, {2, 4, 6, 3}, {0, 2, 8, 2}, {2, 5, 1, 2}, {0, 4, 2, 2},
+	{0, 4, 8, 3}, {2, 4, 6, 3}, {0, 2, 8, 2}, {0, 4, 2, 2},
 }
 
 func TestCreateBoard(t *testing.T) {
 	BoardSize := 3
 	var TempBoard Board
 	for i := 0; i < BoardSize*BoardSize; i++ {
-		TempBoard.Cell = append(TempBoard.Cell, *cell.NewCell())
+		TempBoard.Cell = append(TempBoard.Cell, *cell.NewCell(i))
 
 	}
 	TempBoard.Size = BoardSize
@@ -112,9 +112,10 @@ func TestAnalyseHorizontal(t *testing.T) {
 func TestAnalyseDiagonal(t *testing.T) {
 	fmt.Println("Diagonal Analysis Task")
 	var boardsize = 3
-	countoutleft, countoutright := 0, 0
+
 	b := CreateBoard(boardsize)
 	for o := 0; o < len(testdatafordiagonal); o++ {
+		countoutleft, countoutright := 0, 0
 		countleft, countright := 0, 0
 		b.Cell[testdatafordiagonal[o].FirstCellIndex].Mark = "O"
 		b.Cell[testdatafordiagonal[o].SecondCellIndex].Mark = "O"

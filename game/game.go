@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"model/board"
 	"model/player"
+	"strconv"
 )
 
 type Game struct {
@@ -17,22 +18,22 @@ type Game struct {
 
 var newGame *Game
 
-func CreateGame(Player1Name, Player2Name string, GridSize int) *Game {
+func CreateGame(Player1Name, Player2Name, Player1Mark, Player2Mark string, GridSize int) *Game {
 	if newGame != nil {
 		return newGame
 	}
-	newGame = CreateNewGame(Player1Name, Player2Name, GridSize)
+	newGame = CreateNewGame(Player1Name, Player2Name, Player1Mark, Player2Mark, GridSize)
 	return newGame
 }
 
-func CreateNewGame(Player1Name, Player2Name string, GridSize int) *Game {
+func CreateNewGame(Player1Name, Player2Name, Player1Mark, Player2Mark string, GridSize int) *Game {
 
 	var tempGame Game
 	tempGame.Board = *board.CreateNewBoard(GridSize)
-	tempGame.Player1 = *player.CreateNewPlayer(Player1Name, "X")
-	tempGame.Player2 = *player.CreateNewPlayer(Player2Name, "O")
+	tempGame.Player1 = *player.CreateNewPlayer(Player1Name, Player1Mark)
+	tempGame.Player2 = *player.CreateNewPlayer(Player2Name, Player2Mark)
 	tempGame.GridSize = GridSize
-	tempGame.turn = 0
+	tempGame.turn = 1
 
 	return &tempGame
 }
@@ -41,37 +42,90 @@ func (g *Game) PrintBoard() {
 	n := 0
 	for i := 0; i < g.GridSize; i++ {
 		for j := 0; j < g.GridSize; j++ {
-			fmt.Printf("%s ", g.Board.Cell[n])
-			n = n + 1
+			if n < 10 {
+				fmt.Print("|   ", g.Board.Cell[n].Mark, "  |")
+				n = n + 1
+			} else {
+				fmt.Print("|  ", g.Board.Cell[n].Mark, "  |")
+				n = n + 1
+			}
 		}
-		fmt.Println()
+		fmt.Print("\n")
+		for k := 0; k < g.GridSize; k++ {
+
+			fmt.Print("========")
+		}
+		fmt.Print("\n")
+
 	}
 }
 
 func (g *Game) PlayGame() bool {
+
 	var MarkCellPlayer1 int
+	var iswinbyplayer1 bool
+ErrByP1:
+	if g.turn > g.GridSize*g.GridSize {
+		fmt.Println("Match is Draw")
+		newGame = nil
+		return true
+	}
 	fmt.Println("Player 1 turn")
+	Gridmax := g.GridSize * g.GridSize
+	fmt.Println("Max Grid Size", Gridmax)
 	fmt.Println("Select position to mark")
-	fmt.Scan(&MarkCellPlayer1)
-	iswinbyplayer1, err := g.Player1Turn(MarkCellPlayer1)
+	_, err := fmt.Scan(&MarkCellPlayer1)
+	if MarkCellPlayer1 < 0 || MarkCellPlayer1 >= Gridmax || err != nil {
+		fmt.Println("Enter Number In range")
+		goto ErrByP1
+	}
+
+	isMarked := g.IsCellMArked(MarkCellPlayer1)
+	if !isMarked {
+		fmt.Println("Select position already marked")
+		goto ErrByP1
+	}
+
+	iswinbyplayer1, err = g.Player1Turn(MarkCellPlayer1)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		if iswinbyplayer1 {
+			newGame = nil
 			return true
 		}
 
 	}
 
 	var MarkCellPlayer2 int
+ErrByP2:
+	fmt.Println("gridsize:", g.GridSize)
+	if g.turn > g.GridSize*g.GridSize {
+		fmt.Println("Match is Draw")
+		newGame = nil
+		return true
+	}
 	fmt.Println("Player 2 turn")
+
 	fmt.Println("Select position to mark")
-	fmt.Scan(&MarkCellPlayer2)
+	_, err = fmt.Scan(&MarkCellPlayer2)
+	if MarkCellPlayer2 < 0 || MarkCellPlayer2 >= g.GridSize*g.GridSize || err != nil {
+		fmt.Println("Enter Number In range")
+		goto ErrByP2
+	}
+	isMarked = g.IsCellMArked(MarkCellPlayer2)
+	if !isMarked {
+		fmt.Println("Select position already marked")
+		goto ErrByP2
+	}
+
 	iswinbyplayer2, err := g.Player2Turn(MarkCellPlayer2)
 	if err != nil {
 		fmt.Println(err)
 	} else {
+
 		if iswinbyplayer2 {
+			newGame = nil
 			return true
 		}
 
@@ -85,14 +139,6 @@ func (g *Game) Player1Turn(cellNo int) (bool, error) {
 		return false, errors.New("not a valid cell")
 	}
 
-	// ceeck for turns >8 deaw
-	if g.turn > g.GridSize*g.GridSize {
-		fmt.Println("Match is Draw")
-		newGame = nil
-		return true, nil
-	}
-
-	//check for player turn
 	err := g.MarkCell(cellNo, g.Player1)
 	if err != nil {
 		return false, err
@@ -115,13 +161,7 @@ func (g *Game) Player2Turn(CellNo int) (bool, error) {
 
 		return false, errors.New("not a valid cell")
 	}
-
-	// ceeck for turns >8 deaw
-	if g.turn > g.GridSize*g.GridSize {
-		fmt.Println("Match is Draw")
-		newGame = nil
-		return true, nil
-	}
+	fmt.Println(g.turn)
 
 	//check for player turn
 	err := g.MarkCell(CellNo, g.Player2)
@@ -143,21 +183,14 @@ func (g *Game) Player2Turn(CellNo int) (bool, error) {
 func (g *Game) MarkCell(cellNo int, Player player.Player) error {
 
 	fmt.Println(" mark cell index ", cellNo)
-	if g.Board.Cell[cellNo].Mark != "" {
-		return errors.New(" Cell Already marked")
+	if g.Board.Cell[cellNo].Mark == strconv.Itoa(cellNo) {
+		g.Board.Cell[cellNo].Mark = Player.Mark
+		return nil
 	}
-	g.Board.Cell[cellNo].Mark = Player.Mark
+	return errors.New(" Cell Already marked")
 
-	return nil
 }
-func (g *Game) ClearBoard() {
+func (g *Game) IsCellMArked(position int) bool {
 
-	n := 0
-	for i := 0; i < g.GridSize; i++ {
-		for j := 0; j < g.GridSize; j++ {
-			g.Board.Cell[n].Mark = ""
-			n = n + 1
-		}
-		fmt.Println()
-	}
+	return g.Board.Cell[position].Mark == strconv.Itoa(position)
 }
