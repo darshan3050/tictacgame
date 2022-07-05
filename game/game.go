@@ -61,7 +61,7 @@ func (g *Game) PrintBoard() {
 }
 
 func (g *Game) PlayGame() bool {
-
+	var MarkCellPlayerText string
 	var MarkCellPlayer1 int
 	var iswinbyplayer1 bool
 ErrByP1:
@@ -72,9 +72,11 @@ ErrByP1:
 	}
 	fmt.Println("Player 1 turn")
 	Gridmax := g.GridSize * g.GridSize
-	fmt.Println("Max Grid Size", Gridmax)
+
 	fmt.Println("Select position to mark")
-	_, err := fmt.Scan(&MarkCellPlayer1)
+	fmt.Scanln(&MarkCellPlayerText)
+	var err error
+	MarkCellPlayer1, err = strconv.Atoi(MarkCellPlayerText)
 	if MarkCellPlayer1 < 0 || MarkCellPlayer1 >= Gridmax || err != nil {
 		fmt.Println("Enter Number In range")
 		goto ErrByP1
@@ -99,7 +101,7 @@ ErrByP1:
 
 	var MarkCellPlayer2 int
 ErrByP2:
-	fmt.Println("gridsize:", g.GridSize)
+
 	if g.turn > g.GridSize*g.GridSize {
 		fmt.Println("Match is Draw")
 		newGame = nil
@@ -108,7 +110,9 @@ ErrByP2:
 	fmt.Println("Player 2 turn")
 
 	fmt.Println("Select position to mark")
-	_, err = fmt.Scan(&MarkCellPlayer2)
+	fmt.Scanln(&MarkCellPlayerText)
+
+	MarkCellPlayer2, err = strconv.Atoi(MarkCellPlayerText)
 	if MarkCellPlayer2 < 0 || MarkCellPlayer2 >= g.GridSize*g.GridSize || err != nil {
 		fmt.Println("Enter Number In range")
 		goto ErrByP2
@@ -182,7 +186,6 @@ func (g *Game) Player2Turn(CellNo int) (bool, error) {
 }
 func (g *Game) MarkCell(cellNo int, Player player.Player) error {
 
-	fmt.Println(" mark cell index ", cellNo)
 	if g.Board.Cell[cellNo].Mark == strconv.Itoa(cellNo) {
 		g.Board.Cell[cellNo].Mark = Player.Mark
 		return nil
